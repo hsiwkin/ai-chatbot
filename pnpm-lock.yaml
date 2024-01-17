@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@langchain/core':
+    specifier: ^0.1.15
+    version: 0.1.15
   '@langchain/openai':
     specifier: ^0.0.12
     version: 0.0.12

@@ -7,7 +7,7 @@ class OpenaiService {
       apiKey: process.env.OPENAI_API_KEY,
     });
   }
-  async triggerCompetition() {
+  async testRun() {
     const completion = await this.openai.chat.completions.create({
       messages: [{ role: 'system', content: 'You are a helpful assistant.' }],
       model: 'gpt-3.5-turbo',
