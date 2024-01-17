@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { askQuestion } from '@/app/server-actions';
+import { langChainService } from '@/services/langchain.service';
 
 export default function Home() {
   const [conversation, setConversation] = useState([] as string[]);
