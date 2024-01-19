@@ -1,10 +1,12 @@
-import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
-import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { StringOutputParser } from '@langchain/core/output_parsers';
-import { CheerioWebBaseLoader } from 'langchain/document_loaders/web/cheerio';
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+import { ChatOpenAI } from '@langchain/openai';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { createRetrievalChain } from 'langchain/chains/retrieval';
+import { createHistoryAwareRetriever } from 'langchain/chains/history_aware_retriever';
+import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
+import {
+  ChatPromptTemplate,
+  MessagesPlaceholder,
+} from '@langchain/core/prompts';
+import { StringOutputParser } from '@langchain/core/output_parsers';
 
 class LangChainService {
   private chatModel: ChatOpenAI;
@@ -13,54 +15,29 @@ class LangChainService {
   constructor() {
     this.chatModel = new ChatOpenAI({
       openAIApiKey: process.env.OPENAI_API_KEY,
+      temperature: 0.9,
     });
   }
 
-  async loadLearningData() {
-    const loader = new CheerioWebBaseLoader(
-      'https://docs.smith.langchain.com/overview',
-    );
-
-    const docs = await loader.load();
-
-    const splitter = new RecursiveCharacterTextSplitter();
-
-    const splitDocs = await splitter.splitDocuments(docs);
-    const embeddings = new OpenAIEmbeddings();
-
-    this.vectorStore = await MemoryVectorStore.fromDocuments(
-      splitDocs,
-      embeddings,
-    );
-  }
-
-  async testRun(question: string) {
-    const prompt = ChatPromptTemplate.fromMessages([
-      ['system', 'You are a world class technical documentation writer.'],
+  async chat(
+    question: string,
+    conversation: ChatMessageHistory,
+  ): Promise<string> {
+    const chatPromptWithHistory = ChatPromptTemplate.fromMessages([
+      new MessagesPlaceholder('chat_history'),
       ['user', '{input}'],
     ]);
 
-    const outputParser = new StringOutputParser();
-
-    const documentChain = prompt.pipe(this.chatModel).pipe(outputParser);
-
-    if (!this.vectorStore) {
-      throw new Error('Vector store not loaded');
-    }
-
-    const retriever = this.vectorStore.asRetriever();
-
-    const retrievalChain = await createRetrievalChain({
-      combineDocsChain: documentChain,
-      retriever,
-    });
-
-    const response = await retrievalChain.invoke({
-      input: question,
-    });
-
-    return response.answer;
+    return await chatPromptWithHistory
+      .pipe(this.chatModel)
+      .pipe(new StringOutputParser())
+      .invoke({
+        input: question,
+        chat_history: conversation,
+      });
   }
+
+  // async llmPrompt(question: string): Promise<string> {}
 }
 
 let langChainService: LangChainService | undefined;
@@ -70,6 +47,5 @@ export const getLangChainService = async (): Promise<LangChainService> => {
   }
 
   langChainService = new LangChainService();
-  await langChainService.loadLearningData();
   return langChainService;
 };

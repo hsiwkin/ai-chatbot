@@ -1,17 +1,15 @@
 'use client';
-import { useState } from 'react';
-import { askQuestion } from '@/app/server-actions';
-import { langChainService } from '@/services/langchain.service';
+import React, { useState } from 'react';
+import { askChatQuestion } from '@/app/server-actions';
 
 export default function Home() {
-  const [conversation, setConversation] = useState([] as string[]);
+  const [chatHistory, setChatHistory] = useState([] as string[][]);
 
   const handleQuestionAsked = async (form: FormData) => {
     const question = form.get('question') as string;
-    setConversation([...conversation, question]);
-    conversation.push(question);
-    const response = await askQuestion(question);
-    setConversation([...conversation, response]);
+    setChatHistory([...chatHistory, ['user', question]]);
+    const response = await askChatQuestion(question, chatHistory);
+    setChatHistory([...chatHistory, ['ai', response]]);
   };
 
   return (
@@ -23,7 +21,7 @@ export default function Home() {
         <button type="submit">Ask</button>
       </form>
 
-      {conversation.map((message, index) => (
+      {chatHistory.map((message, index) => (
         <p key={index}>{message}</p>
       ))}
     </div>
