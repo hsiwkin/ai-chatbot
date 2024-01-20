@@ -1,6 +1,4 @@
 import { ChatOpenAI } from '@langchain/openai';
-import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { createHistoryAwareRetriever } from 'langchain/chains/history_aware_retriever';
 import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
 import {
   ChatPromptTemplate,
@@ -10,7 +8,6 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 
 class LangChainService {
   private chatModel: ChatOpenAI;
-  private vectorStore?: MemoryVectorStore;
 
   constructor() {
     this.chatModel = new ChatOpenAI({
