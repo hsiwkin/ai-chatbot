@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "terminal:dev": "ts-node terminal/index.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -16,12 +17,15 @@
     "next": "14.0.4",
     "openai": "^4.24.3",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "readline-sync": "^1.4.10",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/readline-sync": "^1.4.8",
     "autoprefixer": "^10.0.1",
     "postcss": "^8",
     "prettier": "^3.1.1",

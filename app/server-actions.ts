@@ -1,28 +1,31 @@
 'use server';
 import { getLangChainService } from '@/services/langchain.service';
-import { AIMessage, HumanMessage } from '@langchain/core/messages';
-import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
+import { ChatMessage } from '@/app/types';
+import {
+  AIMessage,
+  HumanMessage,
+  SystemMessage,
+} from '@langchain/core/messages';
 
 export const askChatQuestion = async (
-  question: string,
-  chatHistory: string[][],
+  question: ChatMessage,
+  chatHistory: ChatMessage[],
 ): Promise<string> => {
   'use server';
 
-  const msgConstructor = {
-    user: HumanMessage,
-    ai: AIMessage,
-  };
-
-  const objectifiedChatHistory = chatHistory.reduce((acc, msg) => {
-    const role = msg[0] as 'user' | 'ai';
-
-    const msgObj = new msgConstructor[role](msg[1]);
-    acc.addMessage(msgObj);
-    return acc;
-  }, new ChatMessageHistory());
-
   const langChainService = await getLangChainService();
 
-  return await langChainService.chat(question, objectifiedChatHistory);
+  const messageMapper = {
+    human: HumanMessage,
+    ai: AIMessage,
+    system: SystemMessage,
+  };
+
+  const objectifiedHistory = chatHistory.map((msg: ChatMessage) => {
+    const Constructor = messageMapper[msg.type];
+
+    return new Constructor(msg.content);
+  });
+
+  return await langChainService.chat(question.content, objectifiedHistory);
 };

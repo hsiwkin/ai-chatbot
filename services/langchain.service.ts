@@ -5,8 +5,9 @@ import {
   MessagesPlaceholder,
 } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
+import { BaseMessage } from '@langchain/core/messages';
 
-class LangChainService {
+class LangchainService {
   private chatModel: ChatOpenAI;
 
   constructor() {
@@ -16,33 +17,28 @@ class LangChainService {
     });
   }
 
-  async chat(
-    question: string,
-    conversation: ChatMessageHistory,
-  ): Promise<string> {
-    const chatPromptWithHistory = ChatPromptTemplate.fromMessages([
+  async chat(question: string, conversation: BaseMessage[]): Promise<string> {
+    const prompt = ChatPromptTemplate.fromMessages([
       new MessagesPlaceholder('chat_history'),
       ['user', '{input}'],
     ]);
+    const formattedPrompt = await prompt.formatMessages({
+      input: question,
+      chat_history: conversation,
+    });
 
-    return await chatPromptWithHistory
-      .pipe(this.chatModel)
+    return await this.chatModel
       .pipe(new StringOutputParser())
-      .invoke({
-        input: question,
-        chat_history: conversation,
-      });
+      .invoke(formattedPrompt);
   }
-
-  // async llmPrompt(question: string): Promise<string> {}
 }
 
-let langChainService: LangChainService | undefined;
-export const getLangChainService = async (): Promise<LangChainService> => {
+let langChainService: LangchainService | undefined;
+export const getLangChainService = async (): Promise<LangchainService> => {
   if (langChainService) {
     return langChainService;
   }
 
-  langChainService = new LangChainService();
+  langChainService = new LangchainService();
   return langChainService;
 };
