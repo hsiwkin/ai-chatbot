@@ -1,5 +1,5 @@
 'use server';
-import { getLangChainService } from '@/services/langchain.service';
+import { getLangChainService } from '@/services/langchain/langchain.service';
 import { ChatMessage } from '@/app/types';
 import {
   AIMessage,
