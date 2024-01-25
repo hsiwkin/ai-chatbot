@@ -15,6 +15,10 @@ export const askChatQuestion = async (
 
   const langChainService = await getLangChainService();
 
+  console.log('LOADING DOG MEMORIES');
+  const dogMemories = await langChainService.loadSimilarMemories('dog');
+  console.log(dogMemories);
+
   const messageMapper = {
     human: HumanMessage,
     ai: AIMessage,

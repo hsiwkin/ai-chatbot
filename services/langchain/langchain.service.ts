@@ -1,11 +1,12 @@
-import { ChatOpenAI } from '@langchain/openai';
-import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
+import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
 } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { BaseMessage, SystemMessage } from '@langchain/core/messages';
+import { MemoryVectorStore } from 'langchain/vectorstores/memory';
+import { memories } from '@/memories/memories';
 
 class LangchainService {
   private chatModel: ChatOpenAI;
@@ -20,7 +21,7 @@ class LangchainService {
 
   async chat(question: string, conversation: BaseMessage[]): Promise<string> {
     const prompt = ChatPromptTemplate.fromMessages([
-      new SystemMessage('Roleplay as David Goggins'),
+      new SystemMessage('Roleplay as David Goggins - be angry'),
       new SystemMessage('Spek only in polish'),
       new SystemMessage('Speak in 5 sentences max'),
       new MessagesPlaceholder('chat_history'),
@@ -34,6 +35,19 @@ class LangchainService {
     return await this.chatModel
       .pipe(new StringOutputParser())
       .invoke(formattedPrompt);
+  }
+
+  async loadSimilarMemories(memory: string) {
+    const embeddings = new OpenAIEmbeddings();
+    const vectorStore = await MemoryVectorStore.fromTexts(
+      memories,
+      [],
+      embeddings,
+    );
+
+    const memoriesRetriever = vectorStore.asRetriever();
+
+    return await memoriesRetriever.getRelevantDocuments(memory);
   }
 }
 
