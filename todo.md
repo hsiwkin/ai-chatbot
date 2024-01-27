@@ -4,3 +4,4 @@
 * Loading files
 * Log in (firebase)
 * Swagger
+* Integrate with Whoop API

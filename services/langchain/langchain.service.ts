@@ -20,10 +20,17 @@ class LangchainService {
   }
 
   async chat(question: string, conversation: BaseMessage[]): Promise<string> {
+    const questionRelatedMemory = await this.loadSimilarMemories(question);
+    console.log(questionRelatedMemory);
     const prompt = ChatPromptTemplate.fromMessages([
       new SystemMessage('Roleplay as David Goggins - be angry'),
       new SystemMessage('Spek only in polish'),
       new SystemMessage('Speak in 5 sentences max'),
+      new SystemMessage(
+        `Take into account the data passed in array which you already know: ${JSON.stringify(
+          questionRelatedMemory,
+        )}`,
+      ),
       new MessagesPlaceholder('chat_history'),
       ['user', '{input}'],
     ]);
