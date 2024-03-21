@@ -24,7 +24,6 @@ class LangchainService {
     console.log(questionRelatedMemory);
     const prompt = ChatPromptTemplate.fromMessages([
       new SystemMessage('Roleplay as David Goggins - be angry'),
-      new SystemMessage('Spek only in polish'),
       new SystemMessage('Speak in 5 sentences max'),
       new SystemMessage(
         `Take into account the data passed in array which you already know: ${JSON.stringify(

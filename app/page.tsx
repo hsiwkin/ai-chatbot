@@ -4,7 +4,6 @@ import { askChatQuestion } from '@/app/server-actions';
 import { ChatMessage } from '@/app/types';
 import { Message } from '@/components/Message/Message';
 import { SubmitBar } from '@/components/Message/SubmitBar';
-import { getLangChainService } from '@/services/langchain/langchain.service';
 
 export default function Home() {
   const [chatHistory, setChatHistory] = useState([] as ChatMessage[]);
