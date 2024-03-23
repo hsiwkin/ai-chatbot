@@ -1,11 +1,11 @@
 'use server';
-import { getLangChainService } from '@/services/langchain/langchain.service';
-import { ChatMessage } from '@/app/types';
 import {
   AIMessage,
   HumanMessage,
   SystemMessage,
 } from '@langchain/core/messages';
+import { ChatMessage } from './types';
+import { getLangChainService } from '../services/langchain/langchain.service';
 
 export const askChatQuestion = async (
   question: ChatMessage,
@@ -14,9 +14,6 @@ export const askChatQuestion = async (
   'use server';
 
   const langChainService = await getLangChainService();
-
-  const dogMemories = await langChainService.loadSimilarMemories('dog');
-  console.log(dogMemories);
 
   const messageMapper = {
     human: HumanMessage,

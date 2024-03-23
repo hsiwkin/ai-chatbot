@@ -1,12 +1,12 @@
-import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
 import {
   ChatPromptTemplate,
   MessagesPlaceholder,
 } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { BaseMessage, SystemMessage } from '@langchain/core/messages';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { memories } from '@/memories/memories';
+import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
+import { BaseMessage, SystemMessage } from '@langchain/core/messages';
+import { memories } from '../../memories/memories';
 
 class LangchainService {
   private chatModel: ChatOpenAI;
@@ -15,20 +15,17 @@ class LangchainService {
     this.chatModel = new ChatOpenAI({
       openAIApiKey: process.env.OPENAI_API_KEY,
       temperature: 0,
-      modelName: 'gpt-4-1106-preview',
+      modelName: 'gpt-4-0125-preview',
     });
   }
 
   async chat(question: string, conversation: BaseMessage[]): Promise<string> {
     const questionRelatedMemory = await this.loadSimilarMemories(question);
-    console.log(questionRelatedMemory);
     const prompt = ChatPromptTemplate.fromMessages([
       new SystemMessage('Roleplay as David Goggins - be angry'),
-      new SystemMessage('Speak in 5 sentences max'),
+      new SystemMessage('Speak in 3-5 sentences'),
       new SystemMessage(
-        `Take into account the data passed in array which you already know: ${JSON.stringify(
-          questionRelatedMemory,
-        )}`,
+        `Your memory: ${JSON.stringify(questionRelatedMemory)}`,
       ),
       new MessagesPlaceholder('chat_history'),
       ['user', '{input}'],

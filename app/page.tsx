@@ -1,9 +1,9 @@
 'use client';
 import React, { useState } from 'react';
-import { askChatQuestion } from '@/app/server-actions';
-import { ChatMessage } from '@/app/types';
-import { Message } from '@/components/Message/Message';
-import { SubmitBar } from '@/components/Message/SubmitBar';
+import { ChatMessage } from './types';
+import { askChatQuestion } from './server-actions';
+import { Message } from '../components/Message/Message';
+import { SubmitBar } from '../components/Message/SubmitBar';
 
 export default function Home() {
   const [chatHistory, setChatHistory] = useState([] as ChatMessage[]);

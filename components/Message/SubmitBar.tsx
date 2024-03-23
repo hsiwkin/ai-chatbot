@@ -1,18 +1,22 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import { LoadingDots } from './LoadingDots/LoadingDots';
 
 export function SubmitBar({
   handleQuestionAsked,
 }: {
-  handleQuestionAsked: (formData: FormData) => void;
+  handleQuestionAsked: (formData: FormData) => Promise<void>;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleQuestionAskedInternal = (formData: FormData) => {
+  const handleQuestionAskedInternal = async (formData: FormData) => {
     if (inputRef.current) {
       inputRef.current.value = '';
     }
 
-    handleQuestionAsked(formData);
+    setLoading(true);
+    await handleQuestionAsked(formData);
+    setLoading(false);
   };
 
   return (
@@ -28,7 +32,7 @@ export function SubmitBar({
           type="submit"
           className="px-8 rounded-r bg-blue-500 hover:bg-blue-600 text-white font-bold p-2 uppercase border-blue-500 border-t border-b border-r"
         >
-          Ask
+          {loading ? <LoadingDots /> : 'Ask'}
         </button>
       </div>
     </form>
