@@ -10,8 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@langchain/core": "^0.1.49",
     "convict": "^6.2.4",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "langchain": "^0.1.28"
   },
   "devDependencies": {
     "@types/convict": "^6.1.6",

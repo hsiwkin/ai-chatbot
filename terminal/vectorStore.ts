@@ -1,9 +1,11 @@
 import { DataSourceOptions } from 'typeorm';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { TypeORMVectorStore } from '@langchain/community/vectorstores/typeorm';
+import { Document } from '@langchain/core/documents';
+
 import { config } from './config';
 
-export const run = async () => {
+const getVectorDb = async () => {
   const args = {
     postgresConnectionOptions: {
       type: 'postgres',
@@ -22,14 +24,23 @@ export const run = async () => {
 
   await typeormVectorStore.ensureTableInDatabase();
 
-  await typeormVectorStore.addDocuments([
-    { pageContent: "what's this", metadata: { a: 2 } },
-    { pageContent: 'Cat drinks milk', metadata: { a: 1 } },
-  ]);
-
-  const results = await typeormVectorStore.similaritySearch('hello', 2);
-
-  console.log(results);
+  return typeormVectorStore;
 };
 
-run().catch((e) => console.error(e));
+type MemoryMetadata = Record<string, string>;
+
+export const addMemory = async (memory: string, metadata?: MemoryMetadata) => {
+  const vectorDb = await getVectorDb();
+
+  const document = {
+    pageContent: memory,
+    metadata,
+  } as Document;
+
+  await vectorDb.addDocuments([document]);
+};
+
+export const retrieveMemories = async (query: string) => {
+  const vectorDb = await getVectorDb();
+  return vectorDb.similaritySearch(query);
+};

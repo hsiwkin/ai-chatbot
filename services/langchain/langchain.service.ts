@@ -6,7 +6,7 @@ import { StringOutputParser } from '@langchain/core/output_parsers';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
 import { BaseMessage, SystemMessage } from '@langchain/core/messages';
-import { memories } from '../../memories/memories';
+import { retrieveMemories } from '../../terminal/vectorStore';
 
 class LangchainService {
   private chatModel: ChatOpenAI;
@@ -41,16 +41,8 @@ class LangchainService {
   }
 
   async loadSimilarMemories(memory: string) {
-    const embeddings = new OpenAIEmbeddings();
-    const vectorStore = await MemoryVectorStore.fromTexts(
-      memories,
-      [],
-      embeddings,
-    );
-
-    const memoriesRetriever = vectorStore.asRetriever();
-
-    return await memoriesRetriever.getRelevantDocuments(memory);
+    const memories = await retrieveMemories(memory);
+    return memories.map((memory) => memory.pageContent);
   }
 }
 
