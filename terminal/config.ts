@@ -7,7 +7,13 @@ configDotenv({
 });
 
 const configObj = convict({
-  openAi: {},
+  openAi: {
+    key: {
+      env: 'OPENAI_API_KEY',
+      default: '',
+      format: String,
+    },
+  },
   db: {
     host: {
       env: 'DB_HOST',

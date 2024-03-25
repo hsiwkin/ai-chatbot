@@ -3,10 +3,10 @@ import {
   MessagesPlaceholder,
 } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { MemoryVectorStore } from 'langchain/vectorstores/memory';
-import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
+import { ChatOpenAI } from '@langchain/openai';
 import { BaseMessage, SystemMessage } from '@langchain/core/messages';
 import { retrieveMemories } from '../../terminal/vectorStore';
+import { IterableReadableStream } from '@langchain/core/utils/stream';
 
 class LangchainService {
   private chatModel: ChatOpenAI;
@@ -20,6 +20,39 @@ class LangchainService {
   }
 
   async chat(question: string, conversation: BaseMessage[]): Promise<string> {
+    const formattedPrompt = await this.prepareFormattedPrompt(
+      question,
+      conversation,
+    );
+
+    return await this.chatModel
+      .pipe(new StringOutputParser())
+      .invoke(formattedPrompt);
+  }
+
+  async streamChat(
+    question: string,
+    conversation: BaseMessage[],
+  ): Promise<IterableReadableStream<string>> {
+    const formattedPrompt = await this.prepareFormattedPrompt(
+      question,
+      conversation,
+    );
+
+    return await this.chatModel
+      .pipe(new StringOutputParser())
+      .stream(formattedPrompt);
+  }
+
+  private async loadSimilarMemories(memory: string) {
+    const memories = await retrieveMemories(memory);
+    return memories.map((memory) => memory.pageContent);
+  }
+
+  private async prepareFormattedPrompt(
+    question: string,
+    conversation: BaseMessage[],
+  ): Promise<BaseMessage[]> {
     const questionRelatedMemory = await this.loadSimilarMemories(question);
     const prompt = ChatPromptTemplate.fromMessages([
       new SystemMessage('Roleplay as David Goggins - be angry'),
@@ -30,19 +63,10 @@ class LangchainService {
       new MessagesPlaceholder('chat_history'),
       ['user', '{input}'],
     ]);
-    const formattedPrompt = await prompt.formatMessages({
+    return await prompt.formatMessages({
       input: question,
       chat_history: conversation,
     });
-
-    return await this.chatModel
-      .pipe(new StringOutputParser())
-      .invoke(formattedPrompt);
-  }
-
-  async loadSimilarMemories(memory: string) {
-    const memories = await retrieveMemories(memory);
-    return memories.map((memory) => memory.pageContent);
   }
 }
 

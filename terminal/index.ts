@@ -4,6 +4,7 @@ import { configDotenv } from 'dotenv';
 import path from 'node:path';
 import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
 import { addMemory } from './vectorStore';
+import chalk from 'chalk';
 
 configDotenv({ path: path.join(__dirname, '..', '.env.local') });
 
@@ -45,11 +46,26 @@ const program = async () => {
 
   while (true) {
     const question = (await prompt('> ')) as string;
-    const response = await ai.chat(question, []);
-    console.log(response);
+    if (!question.length) {
+      continue;
+    }
+    const responseStream = await ai.streamChat(
+      question,
+      await history.getMessages(),
+    );
+    console.log('\n');
+
+    const chunks = [];
+    for await (const responseChunk of responseStream) {
+      process.stdout.write(chalk.green(responseChunk));
+      chunks.push(responseChunk);
+    }
+
+    const wholeResponseText = chunks.join('');
+    console.log(wholeResponseText);
 
     await history.addUserMessage(question);
-    await history.addAIMessage(response);
+    await history.addAIMessage(wholeResponseText);
   }
 };
 program().catch((e) => console.error(e));
