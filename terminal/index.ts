@@ -62,7 +62,7 @@ const program = async () => {
     }
 
     const wholeResponseText = chunks.join('');
-    console.log(wholeResponseText);
+    console.log('\n');
 
     await history.addUserMessage(question);
     await history.addAIMessage(wholeResponseText);
